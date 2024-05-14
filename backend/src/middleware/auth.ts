@@ -21,13 +21,15 @@ export const jwtCheck = auth({
   export const jwtParse=async (req:Request,res:Response,next:NextFunction)=>{
     const {authorization}=req.headers;
 
-    if(!authorization|| !authorization.startsWith("Bearer ")){
+    if(!authorization||!authorization.startsWith("Bearer ")){
         return res.status(401);
     }
     const token=authorization.split(" ")[1];
         const decoded=jwt.decode(token) as jwt.JwtPayload;
         const auth0Id=decoded.sub;
 
+       
+    try{
         const user=await User.findOne({auth0Id});
         if(!user){
             return res.sendStatus(401);
@@ -35,7 +37,7 @@ export const jwtCheck = auth({
         req.auth0Id=auth0Id as string;
         req.userId=user._id.toString();
         next();
-    try{}catch(error){
+    }catch(error){
         return res.sendStatus(401)
     }
   };
